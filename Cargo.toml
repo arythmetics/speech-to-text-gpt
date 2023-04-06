@@ -6,4 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-coqui-stt = "1.0.2"
+pv_cheetah = "*"
+hound = "3.5.0"
+rodio = "0.17.1"
+dotenv = "0.15.0"

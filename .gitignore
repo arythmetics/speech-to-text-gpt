@@ -1,3 +1,4 @@
 /target
 *.pbmm
 *.scorer
+*.env
