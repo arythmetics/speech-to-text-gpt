@@ -7,6 +7,10 @@ edition = "2021"
 
 [dependencies]
 pv_cheetah = "*"
-hound = "3.5.0"
-rodio = "0.17.1"
+pv_recorder = "*"
+chrono = "0.4.20"
+clap = "3.2.16"
+ctrlc = "3.2.2"
+hound = "3.4.0"
+itertools = "0.10.3"
 dotenv = "0.15.0"
