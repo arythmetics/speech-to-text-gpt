@@ -14,3 +14,5 @@ ctrlc = "3.2.2"
 hound = "3.4.0"
 itertools = "0.10.3"
 dotenv = "0.15.0"
+serde = { version = "1.0.159", features = ["derive"] }
+reqwest = "0.11.16"
