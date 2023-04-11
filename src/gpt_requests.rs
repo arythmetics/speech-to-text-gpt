@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use reqwest::{Client, Error as ReqwestError};
+use reqwest::{Client, Error as ReqwestError, Response as ReqwestResponse};
 
 #[derive(Serialize, Deserialize)]
 struct Messages {
@@ -8,24 +8,27 @@ struct Messages {
 }
 
 #[derive(Serialize, Deserialize)]
-struct Body {
+pub struct Body {
     model: String,
     messages: Vec<Messages>,
+    pub temperature: u8,
 }
 
 impl Body {
-    fn new(content: String) -> Body {
+    pub fn new(content: String) -> Body {
         Body {
             model: String::from("gpt-3.5-turbo"),
-            messages: vec![Messages { role: String::from("user"), content: content }]
+            messages: vec![Messages { role: String::from("user"), content: content }],
+            temperature: 10
         }
     }
 }
 
-async fn post_to_chatgpt(client: &Client, body: &Body) -> Result<(), ReqwestError> {
+pub async fn post_to_chatgpt(client: &Client, body: &Body, token: &String) -> Result<ReqwestResponse, ReqwestError> {
     let res = client.post("https://api.openai.com/v1/chat/completions")
-        .form(body)
+        .json(body)
+        .bearer_auth(token)
         .send()
         .await?;
-    Ok(())
+    Ok(res)
 }

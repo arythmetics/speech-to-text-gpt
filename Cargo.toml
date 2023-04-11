@@ -3,7 +3,12 @@ name = "speech-to-text-chatgpt"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[test]]
+name = "integration_tests"
+path = "tests/gpt_requests_tests.rs"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
 
 [dependencies]
 pv_cheetah = "*"
@@ -15,4 +20,5 @@ hound = "3.4.0"
 itertools = "0.10.3"
 dotenv = "0.15.0"
 serde = { version = "1.0.159", features = ["derive"] }
-reqwest = "0.11.16"
+reqwest = {version = "0.11.16", features = ["json"] }
+serde_json = "1.0.95"

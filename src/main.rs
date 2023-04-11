@@ -1,10 +1,7 @@
-mod audio_input;
-mod recorder;
-mod gpt_requests;
-
-use audio_input::*;
-use recorder::run_recorder;
-
+use speech_to_text_chatgpt::{
+    audio_input::*, 
+    recorder::*
+};
 
 use dotenv::dotenv;
 
