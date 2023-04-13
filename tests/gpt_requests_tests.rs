@@ -1,11 +1,10 @@
 use speech_to_text_chatgpt::{
-    gpt_requests::{post_to_chatgpt, Body},
+    gpt_requests::{post_to_chatgpt, Body, GptResponse, MessageObject},
 };
 use reqwest::Client;
 use std::env;
 use dotenv::dotenv;
 use tokio::runtime::Runtime;
-use serde_json::Value;
 
 #[test]
 fn test_post_to_chatgpt() {
@@ -23,7 +22,14 @@ fn test_post_to_chatgpt() {
 
         let res = post_to_chatgpt(&client, &body, &token).await;
         assert!(res.is_ok());
-        let content_from_gpt:Result<Value, reqwest::Error> = res.unwrap().json().await;
-        println!("{:#?}", content_from_gpt);
+
+        let content_from_gpt:Result<GptResponse, reqwest::Error> = res.unwrap().json().await;
+        assert!(content_from_gpt.is_ok());
+
+        let gpt_response: GptResponse = content_from_gpt.unwrap();
+        assert!(gpt_response.choices.len() > 0);
+
+        let gpt_message: &MessageObject = &gpt_response.choices.get(0).unwrap().message;
+        assert_eq!(gpt_message.content, String::from("This is a test."))
     });
 }
