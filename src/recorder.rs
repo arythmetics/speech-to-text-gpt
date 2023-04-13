@@ -10,7 +10,7 @@ pub fn run_recorder(audio_device_index: i32) {
     // Cheetah, for Real Time
     let cheetah: Cheetah = CheetahBuilder::new()
         .enable_automatic_punctuation(true)
-        .endpoint_duration_sec(2.0)
+        .endpoint_duration_sec(1.5)
         .access_key(access_key)
         .init()
         .expect("Unable to create Cheetah");
