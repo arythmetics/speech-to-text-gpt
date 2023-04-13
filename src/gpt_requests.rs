@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize};
 use reqwest::{Client, Error as ReqwestError, Response as ReqwestResponse};
+use std::env::var;
 
 #[derive(Serialize, Deserialize)]
 struct Messages {
@@ -24,8 +25,38 @@ impl Body {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GptResponse {
+    pub choices: Vec<ChoiceObject>,
+    created: u32,
+    id: String,
+    model: String,
+    object: String,
+    usage: UsageObject,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ChoiceObject {
+finish_reason: String,
+index: u32,
+pub message: MessageObject,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct MessageObject {
+    pub content: String,
+    role: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct UsageObject {
+    completion_tokens: u16,
+    prompt_tokens: u16,
+    total_tokens: u16,
+}
+
 pub async fn post_to_chatgpt(client: &Client, body: &Body, token: &String) -> Result<ReqwestResponse, ReqwestError> {
-    let res = client.post("https://api.openai.com/v1/chat/completions")
+    let res = client.post(var("CHAT_GPT_API").unwrap())
         .json(body)
         .bearer_auth(token)
         .send()
