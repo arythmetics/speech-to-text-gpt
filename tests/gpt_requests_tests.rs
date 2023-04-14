@@ -15,12 +15,12 @@ fn test_post_to_chatgpt() {
 
         let test_message = String::from("say this is a test");
 
-        let mut body = Body::new(test_message);
+        let mut body = Body::new(&test_message);
         body.temperature = 0;
 
         let token = env::var("OPENAI_API_KEY").unwrap();
 
-        let res = post_to_chatgpt(&client, &body, &token).await;
+        let res = post_to_chatgpt(&client, body, &token).await;
         assert!(res.is_ok());
 
         let content_from_gpt:Result<GptResponse, reqwest::Error> = res.unwrap().json().await;

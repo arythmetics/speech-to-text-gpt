@@ -16,10 +16,10 @@ pub struct Body {
 }
 
 impl Body {
-    pub fn new(content: String) -> Body {
+    pub fn new(content: &String) -> Body {
         Body {
             model: String::from("gpt-3.5-turbo"),
-            messages: vec![Messages { role: String::from("user"), content: content }],
+            messages: vec![Messages { role: String::from("user"), content: content.to_string() }],
             temperature: 10
         }
     }
@@ -55,9 +55,9 @@ struct UsageObject {
     total_tokens: u16,
 }
 
-pub async fn post_to_chatgpt(client: &Client, body: &Body, token: &String) -> Result<ReqwestResponse, ReqwestError> {
+pub async fn post_to_chatgpt(client: &Client, body: Body, token: &String) -> Result<ReqwestResponse, ReqwestError> {
     let res = client.post(var("CHAT_GPT_API").unwrap())
-        .json(body)
+        .json(&body)
         .bearer_auth(token)
         .send()
         .await?;
