@@ -1,7 +1,8 @@
-use crate::gpt_requests::{post_to_chatgpt, Body};
+use crate::gpt_requests::{post_to_chatgpt, Body, GptResponse};
 
-use reqwest::{Client, Response};
+use reqwest::{Client, Response, Error as ReqwestError};
 use std::env::var;
+use log::error;
 
 #[derive(Default)]
 struct DialogBroker {
@@ -23,12 +24,30 @@ impl DialogBroker {
         self.user_content = user_content
     }
 
-    fn deserialize_chatgpt_response(chatgpt_response: Response) {
-
+    fn consume_chatgpt_message(&mut self, chatgpt_content: GptResponse) {
+        // Unsafe function. Need to add error handling around a blank gpt response
+        self.chatgpt_content = chatgpt_content.choices.get(0).unwrap().message.content.clone();
     }
 
-    async fn communicate_to_chatgpt(self) {
+    async fn deserialize_chatgpt_response(chatgpt_response: Result<Response, ReqwestError>) -> Result<GptResponse, ReqwestError> {
+        match chatgpt_response {
+            Ok(res) => {
+                let deserialied_gpt_response: GptResponse = res.json().await?;
+                Ok(deserialied_gpt_response)
+            }
+            Err(e) => {
+                Err(e)
+            }
+        }
+    }
+
+    async fn communicate_to_chatgpt(&mut self) {
         let res = post_to_chatgpt(&self.client, Body::new(&self.user_content), &var("OPENAI_API_KEY").unwrap()).await;
-        // Need to deserialize gpt response
+        let deserialzied_res = Self::deserialize_chatgpt_response(res).await;
+
+        match deserialzied_res {
+            Ok(chatgpt_content) => self.consume_chatgpt_message(chatgpt_content),
+            Err(e) => error!("Unable to receive message from OpenAI API: {}", e)
+        }
     }
 }
