@@ -3,6 +3,8 @@ pub mod recorder;
 pub mod gpt_requests;
 pub mod dialog_broker;
 
+use std::sync::atomic::AtomicBool;
+
 use recorder::run_recorder;
 
 use crate::audio_input::{show_audio_devices, get_audio_index_from_user};
@@ -17,7 +19,7 @@ pub fn audio_input_setup() -> i32 {
     return idx
 }
 
-pub fn recorder_setup() {
+pub fn recorder_setup(recording_bool: &AtomicBool) {
     let idx = audio_input_setup();
-    run_recorder(idx)
+    run_recorder(idx, recording_bool)
 }
