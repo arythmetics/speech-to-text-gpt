@@ -5,14 +5,14 @@ use std::env::var;
 use log::error;
 
 #[derive(Default)]
-struct DialogBroker {
-    client: Client,
-    user_content: String,
-    chatgpt_content: String,
+pub struct DialogBroker {
+    pub client: Client,
+    pub user_content: String,
+    pub chatgpt_content: String,
 }
 
 impl DialogBroker {
-    fn init() -> DialogBroker {
+    pub fn init() -> DialogBroker {
         let dialog_broker = DialogBroker {
             client: Client::new(),
             ..Default::default()
@@ -20,7 +20,7 @@ impl DialogBroker {
         dialog_broker
     }
 
-    fn consume_user_message(&mut self, user_content: String) {
+    pub fn consume_user_message(&mut self, user_content: String) {
         self.user_content = user_content
     }
 
@@ -41,7 +41,7 @@ impl DialogBroker {
         }
     }
 
-    async fn communicate_to_chatgpt(&mut self) {
+    pub async fn communicate_to_chatgpt(&mut self) {
         let res = post_to_chatgpt(&self.client, Body::new(&self.user_content), &var("OPENAI_API_KEY").unwrap()).await;
         let deserialzied_res = Self::deserialize_chatgpt_response(res).await;
 

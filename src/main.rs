@@ -1,24 +1,28 @@
+use dotenv::dotenv;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use speech_to_text_chatgpt::{
-    recorder_setup
+    dialog_broker::DialogBroker, 
+    utils::close_program, audio_input_setup, 
+    recorder::run_recorder
 };
-
-use dotenv::dotenv;
 
 fn main() {
     dotenv().ok();
     static RUNNING: AtomicBool = AtomicBool::new(true);
     static RECORDING: AtomicBool = AtomicBool::new(false);
 
+    let mut dialog_broker: DialogBroker = DialogBroker::init();
+
     ctrlc::set_handler(|| {
-        RUNNING.store(false, Ordering::SeqCst)
+        close_program(&RECORDING, &RUNNING)
     })
     .expect("Unable to setup signal handler");
 
-    while RUNNING.load(Ordering::SeqCst) {
-        
-    }
+    let idx = audio_input_setup();
 
-    // recorder_setup(&RECORDING)
+    while RUNNING.load(Ordering::SeqCst) {
+        run_recorder(idx, &RECORDING, &mut dialog_broker);
+        println!("{}", dialog_broker.user_content)
+    }
 }
