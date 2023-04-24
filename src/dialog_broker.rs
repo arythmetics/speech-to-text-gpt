@@ -21,7 +21,8 @@ impl DialogBroker {
     }
 
     pub fn consume_user_message(&mut self, user_content: String) {
-        self.user_content = user_content
+        self.user_content = user_content;
+        println!("USER: {}", self.user_content)
     }
 
     fn consume_chatgpt_message(&mut self, chatgpt_content: GptResponse) {
