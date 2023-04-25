@@ -1,10 +1,10 @@
 use crate::gpt_requests::{post_to_chatgpt, Body, GptResponse};
 
 use reqwest::{Client, Response, Error as ReqwestError};
-use std::env::var;
+use std::{env::var, io::Write};
 use log::error;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct DialogBroker {
     pub client: Client,
     pub user_content: String,
@@ -22,7 +22,10 @@ impl DialogBroker {
 
     pub fn consume_user_message(&mut self, user_content: String) {
         self.user_content = user_content;
-        println!("USER: {}", self.user_content)
+        print!("\n");
+        print!("===========================\n");
+        print!("USER: {}\n", self.user_content);
+        std::io::stdout().flush().unwrap()
     }
 
     fn consume_chatgpt_message(&mut self, chatgpt_content: GptResponse) {

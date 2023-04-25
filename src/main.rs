@@ -1,65 +1,36 @@
 use dotenv::dotenv;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::{sync::atomic::{AtomicBool, Ordering}};
 use crossterm::{
-    event::{Event, KeyCode, KeyEvent, KeyModifiers},
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::EnterAlternateScreen,
 };
-use std::io::{stdout, Write};
+use std::io::stdout;
 
 use speech_to_text_chatgpt::{
     dialog_broker::DialogBroker, 
-    utils::close_program, audio_input_setup, 
+    utils::close_program, 
+    audio_input_setup, 
     recorder::run_recorder
 };
 
 fn main() {
     dotenv().ok();
-    static RUNNING: AtomicBool = AtomicBool::new(true);
-    static RECORDING: AtomicBool = AtomicBool::new(false);
-
-    let mut dialog_broker: DialogBroker = DialogBroker::init();
-
+    
     ctrlc::set_handler(|| {
-        close_program(&RECORDING, &RUNNING)
+        close_program(&RUNNING)
     })
     .expect("Unable to setup signal handler");
 
+    static RUNNING: AtomicBool = AtomicBool::new(true);
+    let mut dialog_broker: DialogBroker = DialogBroker::init();
     let idx = audio_input_setup();
+    
+    execute!(stdout(), EnterAlternateScreen).unwrap();
 
-    let mut stdout = stdout();
+    print!("Press CTRL + C to exit the program\n");
 
-    execute!(stdout, EnterAlternateScreen).unwrap();
-    enable_raw_mode().unwrap();
-
-    loop {
-        if let Ok(key_event) = crossterm::event::read() {
-            match key_event {
-                Event::Key(KeyEvent {
-                    code: KeyCode::Char(' '),
-                    modifiers,
-                    ..
-                }) => {
-                    if modifiers == KeyModifiers::empty() {
-                        print!("hello");
-                        stdout.flush().unwrap();
-                    }
-                }
-                Event::Key(KeyEvent {
-                    code: KeyCode::Char('q'),
-                    ..
-                }) => {
-                    break;
-                }
-                _ => {}
-            }
-        }
+    while RUNNING.load(Ordering::SeqCst) {
+        let audio_device_index = idx.clone();
+        run_recorder(audio_device_index, &mut dialog_broker)
     }
-
-    disable_raw_mode().unwrap();
-    execute!(stdout, LeaveAlternateScreen).unwrap();
-
-    // while RUNNING.load(Ordering::SeqCst) {
-    //     run_recorder(idx, &RECORDING, &mut dialog_broker);
-    // }
 }
