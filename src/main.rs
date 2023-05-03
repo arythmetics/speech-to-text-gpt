@@ -14,6 +14,7 @@ use speech_to_text_chatgpt::{
 };
 
 fn main() {
+    env_logger::init();
     dotenv().ok();
     
     ctrlc::set_handler(|| {
@@ -31,6 +32,7 @@ fn main() {
 
     while RUNNING.load(Ordering::SeqCst) {
         let audio_device_index = idx.clone();
-        run_recorder(audio_device_index, &mut dialog_broker)
+        run_recorder(audio_device_index, &mut dialog_broker);
+        dialog_broker.communicate_to_chatgpt()
     }
 }
