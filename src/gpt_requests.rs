@@ -1,14 +1,15 @@
 use serde::{Serialize, Deserialize};
-use reqwest::{Client, Error as ReqwestError, Response as ReqwestResponse};
+use reqwest::blocking::{Client, Response as ReqwestResponse};
+use reqwest::Error as ReqwestError;
 use std::env::var;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct Messages {
     role: String,
     content: String
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Body {
     model: String,
     messages: Vec<Messages>,
@@ -20,7 +21,7 @@ impl Body {
         Body {
             model: String::from("gpt-3.5-turbo"),
             messages: vec![Messages { role: String::from("user"), content: content.to_string() }],
-            temperature: 10
+            temperature: 1
         }
     }
 }
@@ -55,11 +56,10 @@ struct UsageObject {
     total_tokens: u16,
 }
 
-pub async fn post_to_chatgpt(client: &Client, body: Body, token: &String) -> Result<ReqwestResponse, ReqwestError> {
+pub fn post_to_chatgpt(client: &Client, body: Body, token: &String) -> Result<ReqwestResponse, ReqwestError> {
     let res = client.post(var("CHAT_GPT_API").unwrap())
         .json(&body)
         .bearer_auth(token)
-        .send()
-        .await?;
-    Ok(res)
+        .send();
+    res
 }
