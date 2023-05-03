@@ -5,6 +5,12 @@ use crossterm::{
     terminal::EnterAlternateScreen,
 };
 use std::io::stdout;
+use log::LevelFilter;
+use log4rs::{
+    append::file::FileAppender,
+    config::{Appender, Config, Logger, Root},
+    encode::pattern::PatternEncoder,
+};
 
 use speech_to_text_chatgpt::{
     dialog_broker::DialogBroker, 
@@ -14,8 +20,20 @@ use speech_to_text_chatgpt::{
 };
 
 fn main() {
-    env_logger::init();
     dotenv().ok();
+    let pattern = "{d(%Y-%m-%d %H:%M:%S)} {l} {M}: {m}{n}";
+    let file_appender = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(pattern)))
+        .build("log/output.log")
+        .unwrap();
+
+    let config = Config::builder()
+        .appender(Appender::builder().build("file", Box::new(file_appender)))
+        .logger(Logger::builder().build("app", LevelFilter::Info))
+        .build(Root::builder().appender("file").build(LevelFilter::Info))
+        .unwrap();
+
+    log4rs::init_config(config).unwrap();
     
     ctrlc::set_handler(|| {
         close_program(&RUNNING)

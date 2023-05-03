@@ -2,3 +2,4 @@
 *.pbmm
 *.scorer
 *.env
+/log
