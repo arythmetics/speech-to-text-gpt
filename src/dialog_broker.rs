@@ -37,8 +37,8 @@ impl DialogBroker {
         // Unsafe function. Need to add error handling around a blank gpt response
         self.chatgpt_content = chatgpt_content.choices.get(0).unwrap().message.content.clone();
         print!("\n");
+        print!("CHATGPT: {}\n", self.chatgpt_content);
         print!("===========================\n");
-        print!("USER: {}\n", self.chatgpt_content);
         std::io::stdout().flush().unwrap()
     }
 

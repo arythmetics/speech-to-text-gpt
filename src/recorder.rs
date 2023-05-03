@@ -27,7 +27,7 @@ pub fn run_recorder(audio_device_index: i32, dialog_broker: &mut DialogBroker) {
         .init()
         .expect("Failed to initialize pvrecorder");
 
-    print!(">>> Press 'Enter' to start recording: ");
+    print!("\n>>> Press 'Enter' to start recording: ");
     stdout().flush().expect("Failed to flush");
     io::stdin()
         .read_line(&mut input)
@@ -50,7 +50,7 @@ pub fn run_recorder(audio_device_index: i32, dialog_broker: &mut DialogBroker) {
         leopard.process(&audio_data).unwrap()
     });
 
-    print!(">>> Recording ... Speak Clearly ... Press 'Enter' to stop: ");
+    print!(">>> Recording ... Speak Clearly ... Press 'Enter' to stop: \n");
         stdout().flush().expect("Failed to flush");
         io::stdin()
             .read_line(&mut input)
