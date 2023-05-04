@@ -2,10 +2,8 @@ use pv_recorder::RecorderBuilder;
 use std::io::{stdin, stdout, Write};
 
 pub fn show_audio_devices() -> Vec<String> {
-    let audio_devices = RecorderBuilder::new()
-        .init()
-        .expect("Failed to initialize pvrecorder")
-        .get_audio_devices();
+    let audio_devices = RecorderBuilder::new().get_audio_devices();
+        
     match audio_devices {
         Ok(audio_devices) => {
             for (idx, device) in audio_devices.iter().enumerate() {

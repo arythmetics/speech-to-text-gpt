@@ -11,8 +11,8 @@ path = "tests/gpt_requests_tests.rs"
 tokio = { version = "1", features = ["full"] }
 
 [dependencies]
-pv_leopard = "*"
-pv_recorder = "*"
+pv_leopard = "1.2.0"
+pv_recorder = "1.1.2"
 chrono = "0.4.20"
 clap = "3.2.16"
 ctrlc = "3.2.2"
