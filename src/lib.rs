@@ -3,6 +3,7 @@ pub mod recorder;
 pub mod gpt_requests;
 pub mod dialog_broker;
 pub mod utils;
+pub mod redis_broker;
 
 use crate::audio_input::{show_audio_devices, get_audio_index_from_user};
 
