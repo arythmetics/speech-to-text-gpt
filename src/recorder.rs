@@ -1,5 +1,3 @@
-use crate::dialog_broker::DialogBroker;
-
 use std::thread;
 use std::{env, sync::atomic::AtomicBool, sync::atomic::Ordering};
 use leopard::{LeopardBuilder, Leopard};
@@ -9,7 +7,7 @@ use std::io::Write;
 use std::io;
 
 
-pub fn run_recorder(audio_device_index: i32, dialog_broker: &mut DialogBroker) {
+pub async fn run_recorder(audio_device_index: i32) -> String {
     let mut input = String::new();
     let access_key = env::var("PICO_ACCESS_KEY").unwrap();
     static RECORDING: AtomicBool = AtomicBool::new(false);
@@ -58,5 +56,5 @@ pub fn run_recorder(audio_device_index: i32, dialog_broker: &mut DialogBroker) {
         RECORDING.store(false, Ordering::SeqCst);
 
     let leopard_transcript = transcript_handle.join().unwrap();
-    dialog_broker.consume_user_message(leopard_transcript.transcript)
+    return leopard_transcript.transcript
 }
