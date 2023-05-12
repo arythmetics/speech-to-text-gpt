@@ -1,4 +1,5 @@
 use crate::gpt_requests::{post_to_chatgpt, Body, GptResponse};
+use crate::redis_broker::{publish_messages, establish_connection};
 
 use log::{error, info};
 use reqwest::blocking::{Client, Response};
@@ -6,50 +7,54 @@ use reqwest::Error as ReqwestError;
 use std::{env::var, io::Write};
 use std::error::Error as StdError;
 use std::fmt;
+use async_std::sync::{Arc, Mutex};
+use redis::aio::Connection;
 
 #[derive(Default, Clone)]
 pub struct DialogBroker {
-    pub client: Client,
+    pub chatgpt_client: Client,
     pub user_content: String,
     pub chatgpt_content: String,
+    pub redis_connection: Option<Arc<Mutex<Connection>>>,
 }
 
 impl DialogBroker {
-    pub fn init() -> DialogBroker {
+    pub async fn init() -> DialogBroker {
+        let redis_connection = establish_connection().await;
         let dialog_broker = DialogBroker {
-            client: Client::new(),
+            chatgpt_client: Client::new(),
+            redis_connection: Some(Arc::new(Mutex::new(redis_connection))),
             ..Default::default()
         };
         dialog_broker
     }
 
-    pub fn consume_user_message(&mut self, user_content: String) {
+    pub async fn consume_user_message(&mut self, user_content: String) {
         self.user_content = user_content;
-        // Remove
-        self.user_content = String::from("Hi ChatGPT, how are you doing today?");
-        print!("\n");
-        print!("===========================\n");
-        print!("USER: {}\n", self.user_content);
-        std::io::stdout().flush().unwrap()
+        self.user_content = String::from("Hey ChatGPT, How are you?");
+        if let Some(redis_connection) = &self.redis_connection {
+            let mut connection = redis_connection.lock().await;
+            publish_messages(&mut connection, self.user_content.clone()).await;
+        }
     }
 
-    fn consume_chatgpt_message(&mut self, chatgpt_content: GptResponse) {
+    async fn consume_chatgpt_message(&mut self, chatgpt_content: GptResponse) {
         // Unsafe function. Need to add error handling around a blank gpt response
         self.chatgpt_content = chatgpt_content.choices.get(0).unwrap().message.content.clone();
-        print!("\n");
-        print!("CHATGPT: {}\n", self.chatgpt_content);
-        print!("===========================\n");
-        std::io::stdout().flush().unwrap()
+        if let Some(redis_connection) = &self.redis_connection {
+            let mut connection = redis_connection.lock().await;
+            publish_messages(&mut connection, self.chatgpt_content.clone()).await;
+        }
     }
 
-    pub fn communicate_to_chatgpt(&mut self) {
-        let res = post_to_chatgpt(&self.client, Body::new(&self.user_content), &var("OPENAI_API_KEY").unwrap());
+    pub async fn communicate_to_chatgpt(&mut self, payload: String) {
+        let res = post_to_chatgpt(&self.chatgpt_client, Body::new(&payload), &var("OPENAI_API_KEY").unwrap());
 
         match res {
             Ok(r) => {
                 let deserialzied_res = deserialize_chatgpt_response(r);
                 match deserialzied_res {
-                    Ok(chatgpt_content) => self.consume_chatgpt_message(chatgpt_content),
+                    Ok(chatgpt_content) => self.consume_chatgpt_message(chatgpt_content).await,
                     Err(e) => error!("Unable to deserialize message from OpenAI API: {}", e)        
                 }
             }
