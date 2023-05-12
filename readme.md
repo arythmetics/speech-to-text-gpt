@@ -3,7 +3,7 @@
 s2gpt is a rust based CLI application for communicating with ChatGPT using your voice. Voice transcription is specifically done locally to avoid having .wav files of people's voices in far flung server farms.
 
 ## Running locally
-Setting this up to run locally requires a .env file, a redis docker container, and Rust.
+Setting this up to run locally requires a .env file, a redis docker container, and Rust. *Make sure to run this on a machine that has access to your mic*
 
 1. Create the .env file and add the following variables: 
     PICO_ACCESS_KEY=[value]
